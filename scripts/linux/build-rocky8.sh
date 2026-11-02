@@ -9,7 +9,7 @@ dnf -y install gcc-toolset-12-gcc-c++ make cmake ninja-build python39 python39-p
   gtk3-devel libappindicator-gtk3-devel glib2-devel libffi-devel pcre2-devel \
   libxml2-devel libxslt-devel sqlite-devel libicu-devel libjpeg-turbo-devel \
   libpng-devel libwebp-devel openjpeg2-devel lcms2-devel systemd-devel libgcrypt-devel libsecret-devel libtasn1-devel \
-  libXt-devel libepoxy-devel mesa-libEGL-devel mesa-libGL-devel \
+  libXt-devel libepoxy-devel mesa-libEGL-devel mesa-libGL-devel mesa-libgbm-devel libdrm-devel \
   libXcomposite-devel libXdamage-devel libXrandr-devel libnotify-devel \
   harfbuzz-devel hyphen-devel enchant2-devel brotli-devel zlib-devel \
   gnutls-devel libpsl-devel libnghttp2-devel bubblewrap gettext-devel xorg-x11-server-Xvfb dbus-x11 binutils
