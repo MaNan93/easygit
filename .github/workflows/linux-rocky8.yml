@@ -28,6 +28,13 @@ jobs:
           mkdir -p out
           docker run --rm -v "$PWD:/work" rockylinux/rockylinux:8.10 \
             bash /work/scripts/linux/build-rocky8.sh 2>&1 | tee out/build.log
+      - name: Test extracted package in clean Rocky Linux
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s out/easygit-linux-x86_64.tar.gz
+          docker run --rm -v "$PWD:/work" rockylinux/rockylinux:8.10 \
+            bash /work/scripts/linux/smoke-rocky8.sh 2>&1 | tee out/smoke.log
       - name: Upload portable package and diagnostics
         if: always()
         uses: actions/upload-artifact@v4
