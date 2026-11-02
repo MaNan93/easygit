@@ -12,7 +12,7 @@ dnf -y install gcc-toolset-12-gcc-c++ make cmake ninja-build python39 python39-p
   libXt-devel libepoxy-devel mesa-libEGL-devel mesa-libGL-devel \
   libXcomposite-devel libXdamage-devel libXrandr-devel libnotify-devel \
   harfbuzz-devel hyphen-devel enchant2-devel brotli-devel zlib-devel \
-  gnutls-devel libpsl-devel libnghttp2-devel bubblewrap xdg-dbus-proxy gettext-devel xorg-x11-server-Xvfb dbus-x11 binutils
+  gnutls-devel libpsl-devel libnghttp2-devel bubblewrap gettext-devel xorg-x11-server-Xvfb dbus-x11 binutils
 set +u
 source /opt/rh/gcc-toolset-12/enable
 set -u
@@ -39,6 +39,10 @@ if ! pkg-config --exists 'webkit2gtk-4.1 >= 2.40'; then
     -Dsysprof=disabled -Dtls_check=false -Ddocs=disabled
   ninja -C soup-build -j2
   ninja -C soup-build install
+  fetch https://github.com/flatpak/xdg-dbus-proxy/releases/download/0.1.5/xdg-dbus-proxy-0.1.5.tar.xz proxy.tar.xz
+  meson setup proxy-build xdg-dbus-proxy-0.1.5 --prefix="$PREFIX" --libdir=lib -Dman=disabled
+  ninja -C proxy-build -j2
+  ninja -C proxy-build install
   fetch https://webkitgtk.org/releases/webkitgtk-2.40.5.tar.xz webkit.tar.xz
   cmake -S webkitgtk-2.40.5 -B webkit-build -G Ninja \
     -DPORT=GTK -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$PREFIX" \
