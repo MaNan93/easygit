@@ -11,6 +11,7 @@ dnf -y install gcc-toolset-12-gcc-c++ gcc-toolset-12-libatomic-devel make cmake 
   libpng-devel libwebp-devel openjpeg2-devel lcms2-devel systemd-devel libgcrypt-devel libsecret-devel libtasn1-devel \
   libXt-devel libepoxy-devel mesa-libEGL-devel mesa-libGL-devel mesa-libgbm-devel libdrm-devel \
   libXcomposite-devel libXdamage-devel libXrandr-devel libnotify-devel \
+  wayland-devel wayland-protocols-devel libxkbcommon-devel \
   harfbuzz-devel hyphen-devel enchant2-devel brotli-devel zlib-devel \
   gnutls-devel libpsl-devel libnghttp2-devel bubblewrap gettext-devel xorg-x11-server-Xvfb dbus-x11 binutils
 set +u
@@ -45,7 +46,7 @@ npm ci
 npm run check
 cd /build
 fetch() { curl --fail --location --retry 4 "$1" -o "$2"; tar -xf "$2"; }
-if ! pkg-config --exists 'webkit2gtk-4.1 >= 2.40'; then
+if ! pkg-config --exists 'webkit2gtk-4.1 >= 2.42' 'gtk+-wayland-3.0'; then
   if [[ ! -f "$PREFIX/.built-glib-2.70.5" ]]; then
   fetch https://download.gnome.org/sources/glib/2.70/glib-2.70.5.tar.xz glib.tar.xz
   meson setup glib-build glib-2.70.5 --prefix="$PREFIX" --libdir=lib \
@@ -90,37 +91,37 @@ if ! pkg-config --exists 'webkit2gtk-4.1 >= 2.40'; then
   pkg-config --atleast-version=2.35.1 atk
     touch "$PREFIX/.built-atk-2.38.0"
   fi
-  if [[ ! -f "$PREFIX/.built-gtk-3.24.38" ]]; then
+  if [[ ! -f "$PREFIX/.built-gtk-3.24.38-wayland" ]]; then
   fetch https://download.gnome.org/sources/gtk+/3.24/gtk+-3.24.38.tar.xz gtk.tar.xz
   meson setup gtk-build gtk+-3.24.38 --prefix="$PREFIX" --libdir=lib \
-    -Dwayland_backend=false -Dbroadway_backend=false -Dintrospection=false \
+    -Dwayland_backend=true -Dbroadway_backend=false -Dintrospection=false \
     -Dtests=false -Dinstalled_tests=false -Ddemos=false -Dexamples=false \
     -Dgtk_doc=false -Dman=false -Dprint_backends=file,lpr
   ninja -C gtk-build -j2
   ninja -C gtk-build install
-    touch "$PREFIX/.built-gtk-3.24.38"
+    touch "$PREFIX/.built-gtk-3.24.38-wayland"
   fi
-  fetch https://webkitgtk.org/releases/webkitgtk-2.40.5.tar.xz webkit.tar.xz
+  fetch https://webkitgtk.org/releases/webkitgtk-2.42.5.tar.xz webkit.tar.xz
   # Keep sandboxing enabled; allow only the upstream relocation hooks in release builds.
   python3.9 - <<'PY'
 from pathlib import Path
 # With video disabled, unified sources no longer supply these headers indirectly.
-p = Path('webkitgtk-2.40.5/Source/WebCore/loader/MixedContentChecker.cpp')
+p = Path('webkitgtk-2.42.5/Source/WebCore/loader/MixedContentChecker.cpp')
 text = p.read_text()
 anchor = '#include "MixedContentChecker.h"'
 assert text.count(anchor) == 1, 'Unexpected MixedContentChecker include layout'
 p.write_text(text.replace(anchor, anchor + '\n#include "FrameLoader.h"\n#include "FrameLoaderClient.h"'))
-for p in Path('webkitgtk-2.40.5/Source/WebKit').rglob('*.cpp'):
+for p in Path('webkitgtk-2.42.5/Source/WebKit').rglob('*.cpp'):
     text = p.read_text()
     if 'WEBKIT_EXEC_PATH' in text or 'WEBKIT_INJECTED_BUNDLE_PATH' in text:
         p.write_text(text.replace('#if ENABLE(DEVELOPER_MODE)', '#if 1'))
-for p in Path('webkitgtk-2.40.5/Source/WebKit/UIProcess/Launcher/glib').glob('*.cpp'):
+for p in Path('webkitgtk-2.42.5/Source/WebKit/UIProcess/Launcher/glib').glob('*.cpp'):
     text = p.read_text()
     for macro, env in [('BWRAP_EXECUTABLE', 'EASYGIT_BWRAP'), ('DBUS_PROXY_EXECUTABLE', 'EASYGIT_DBUS_PROXY')]:
         text = text.replace(macro, f'(g_getenv("{env}") ? g_getenv("{env}") : {macro})')
     p.write_text(text)
 PY
-  cmake -S webkitgtk-2.40.5 -B webkit-build -G Ninja \
+  cmake -S webkitgtk-2.42.5 -B webkit-build -G Ninja \
     -DPORT=GTK -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$PREFIX" \
     -DCMAKE_INSTALL_LIBDIR=lib -DUSE_SOUP2=OFF -DENABLE_INTROSPECTION=OFF \
     -DENABLE_DOCUMENTATION=OFF -DENABLE_MINIBROWSER=OFF -DENABLE_GAMEPAD=OFF \
@@ -130,6 +131,20 @@ PY
   cmake --install webkit-build
 fi
 pkg-config --modversion webkit2gtk-4.1
+# Check the exact native APIs required by the locked Tauri/wry/tao versions.
+python3.9 - <<'PY'
+import ctypes
+import os
+from pathlib import Path
+for library, symbols in {
+    'libgdk-3.so.0': ('gdk_wayland_display_get_wl_display', 'gdk_wayland_window_get_wl_surface'),
+    'libwebkit2gtk-4.1.so.0': ('webkit_cookie_manager_get_all_cookies', 'webkit_cookie_manager_get_all_cookies_finish'),
+}.items():
+    handle = ctypes.CDLL(str(Path(os.environ['PREFIX']) / 'lib' / library))
+    for symbol in symbols:
+        getattr(handle, symbol)
+        print('Native API available:', symbol)
+PY
 cd /build
 curl --fail --location --retry 4 https://sh.rustup.rs -o rustup.sh
 sh rustup.sh -y --profile minimal --default-toolchain stable

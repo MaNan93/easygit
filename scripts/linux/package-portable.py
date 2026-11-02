@@ -78,7 +78,7 @@ exec "$APP_DIR/bin/easygit" "$@"
 Extract and run ./start.sh from a graphical desktop. Git must be installed.
 No root access or dnf is required on the target. System glibc is not included.
 AI API key storage is unavailable on Linux in upstream.
-This initial WebKitGTK 2.40.5 build is a compatibility experiment using an old
+This initial WebKitGTK 2.42.5 build is a compatibility experiment using an old
 engine; do not use it for untrusted web content. Target-device GUI validation
 is still required. See glibc-audit.txt for bundled ELF symbol requirements.
 ''')
