@@ -30,32 +30,51 @@ mkdir -p /build "$PREFIX" /work/out
 cd /build
 fetch() { curl --fail --location --retry 4 "$1" -o "$2"; tar -xf "$2"; }
 if ! pkg-config --exists 'webkit2gtk-4.1 >= 2.40'; then
+  if [[ ! -f "$PREFIX/.built-glib-2.70.5" ]]; then
   fetch https://download.gnome.org/sources/glib/2.70/glib-2.70.5.tar.xz glib.tar.xz
   meson setup glib-build glib-2.70.5 --prefix="$PREFIX" --libdir=lib \
     -Dtests=false -Dinstalled_tests=false -Dgtk_doc=false -Dman=false -Dselinux=disabled
   ninja -C glib-build -j2
   ninja -C glib-build install
+    touch "$PREFIX/.built-glib-2.70.5"
+  fi
+  if [[ ! -f "$PREFIX/.built-soup-3.2.3" ]]; then
   fetch https://download.gnome.org/sources/libsoup/3.2/libsoup-3.2.3.tar.xz soup.tar.xz
   meson setup soup-build libsoup-3.2.3 --prefix="$PREFIX" --libdir=lib \
     -Dtests=false -Dintrospection=disabled -Dvapi=disabled \
     -Dsysprof=disabled -Dtls_check=false -Ddocs=disabled
   ninja -C soup-build -j2
   ninja -C soup-build install
+    touch "$PREFIX/.built-soup-3.2.3"
+  fi
+  if [[ ! -f "$PREFIX/.built-proxy-0.1.5" ]]; then
   fetch https://github.com/flatpak/xdg-dbus-proxy/releases/download/0.1.5/xdg-dbus-proxy-0.1.5.tar.xz proxy.tar.xz
   meson setup proxy-build xdg-dbus-proxy-0.1.5 --prefix="$PREFIX" --libdir=lib -Dman=disabled
   ninja -C proxy-build -j2
   ninja -C proxy-build install
+    touch "$PREFIX/.built-proxy-0.1.5"
+  fi
+  if [[ ! -f "$PREFIX/.built-icu-72.1" ]]; then
   fetch https://github.com/unicode-org/icu/releases/download/release-72-1/icu4c-72_1-src.tgz icu.tgz
   (cd icu/source && ./configure --prefix="$PREFIX" --libdir="$PREFIX/lib" --disable-tests --disable-samples && make -j2 && make install)
+    touch "$PREFIX/.built-icu-72.1"
+  fi
+  if [[ ! -f "$PREFIX/.built-harfbuzz-6.0.0" ]]; then
   fetch https://github.com/harfbuzz/harfbuzz/releases/download/6.0.0/harfbuzz-6.0.0.tar.xz harfbuzz.tar.xz
   meson setup harfbuzz-build harfbuzz-6.0.0 --prefix="$PREFIX" --libdir=lib -Dicu=enabled -Dtests=disabled -Ddocs=disabled -Dintrospection=disabled
   ninja -C harfbuzz-build -j2
   ninja -C harfbuzz-build install
+    touch "$PREFIX/.built-harfbuzz-6.0.0"
+  fi
+  if [[ ! -f "$PREFIX/.built-atk-2.38.0" ]]; then
   fetch https://download.gnome.org/sources/atk/2.38/atk-2.38.0.tar.xz atk.tar.xz
   meson setup atk-build atk-2.38.0 --prefix="$PREFIX" --libdir=lib -Ddocs=false -Dintrospection=false
   ninja -C atk-build -j2
   ninja -C atk-build install
   pkg-config --atleast-version=2.35.1 atk
+    touch "$PREFIX/.built-atk-2.38.0"
+  fi
+  if [[ ! -f "$PREFIX/.built-gtk-3.24.38" ]]; then
   fetch https://download.gnome.org/sources/gtk+/3.24/gtk+-3.24.38.tar.xz gtk.tar.xz
   meson setup gtk-build gtk+-3.24.38 --prefix="$PREFIX" --libdir=lib \
     -Dwayland_backend=false -Dbroadway_backend=false -Dintrospection=false \
@@ -63,6 +82,8 @@ if ! pkg-config --exists 'webkit2gtk-4.1 >= 2.40'; then
     -Dgtk_doc=false -Dman=false -Dprint_backends=file,lpr
   ninja -C gtk-build -j2
   ninja -C gtk-build install
+    touch "$PREFIX/.built-gtk-3.24.38"
+  fi
   fetch https://webkitgtk.org/releases/webkitgtk-2.40.5.tar.xz webkit.tar.xz
   # Keep sandboxing enabled; allow only the upstream relocation hooks in release builds.
   python3.9 - <<'PY'
