@@ -57,11 +57,11 @@ for p in Path('webkitgtk-2.40.5/Source/WebKit').rglob('*.cpp'):
     text = p.read_text()
     if 'WEBKIT_EXEC_PATH' in text or 'WEBKIT_INJECTED_BUNDLE_PATH' in text:
         p.write_text(text.replace('#if ENABLE(DEVELOPER_MODE)', '#if 1'))
-p = Path('webkitgtk-2.40.5/Source/WebKit/UIProcess/Launcher/glib/BubblewrapLauncher.cpp')
-text = p.read_text()
-for macro, env in [('BWRAP_EXECUTABLE', 'EASYGIT_BWRAP'), ('DBUS_PROXY_EXECUTABLE', 'EASYGIT_DBUS_PROXY')]:
-    text = text.replace(macro, f'(g_getenv("{env}") ? g_getenv("{env}") : {macro})')
-p.write_text(text)
+for p in Path('webkitgtk-2.40.5/Source/WebKit/UIProcess/Launcher/glib').glob('*.cpp'):
+    text = p.read_text()
+    for macro, env in [('BWRAP_EXECUTABLE', 'EASYGIT_BWRAP'), ('DBUS_PROXY_EXECUTABLE', 'EASYGIT_DBUS_PROXY')]:
+        text = text.replace(macro, f'(g_getenv("{env}") ? g_getenv("{env}") : {macro})')
+    p.write_text(text)
 PY
   cmake -S webkitgtk-2.40.5 -B webkit-build -G Ninja \
     -DPORT=GTK -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX="$PREFIX" \
