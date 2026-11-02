@@ -96,6 +96,12 @@ if ! pkg-config --exists 'webkit2gtk-4.1 >= 2.40'; then
   # Keep sandboxing enabled; allow only the upstream relocation hooks in release builds.
   python3.9 - <<'PY'
 from pathlib import Path
+# With video disabled, unified sources no longer supply these headers indirectly.
+p = Path('webkitgtk-2.40.5/Source/WebCore/loader/MixedContentChecker.cpp')
+text = p.read_text()
+anchor = '#include "MixedContentChecker.h"'
+assert text.count(anchor) == 1, 'Unexpected MixedContentChecker include layout'
+p.write_text(text.replace(anchor, anchor + '\n#include "FrameLoader.h"\n#include "FrameLoaderClient.h"'))
 for p in Path('webkitgtk-2.40.5/Source/WebKit').rglob('*.cpp'):
     text = p.read_text()
     if 'WEBKIT_EXEC_PATH' in text or 'WEBKIT_INJECTED_BUNDLE_PATH' in text:
