@@ -8,7 +8,7 @@ dnf -y install gcc-toolset-12-gcc-c++ make cmake ninja-build python39 python39-p
   git curl tar xz unzip patch pkgconf-pkg-config bison flex gperf ruby perl unifdef libseccomp-devel \
   gtk3-devel libappindicator-gtk3-devel glib2-devel libffi-devel pcre2-devel \
   libxml2-devel libxslt-devel sqlite-devel libicu-devel libjpeg-turbo-devel \
-  libpng-devel libwebp-devel libgcrypt-devel libsecret-devel libtasn1-devel \
+  libpng-devel libwebp-devel openjpeg2-devel lcms2-devel systemd-devel libgcrypt-devel libsecret-devel libtasn1-devel \
   libXt-devel libepoxy-devel mesa-libEGL-devel mesa-libGL-devel \
   libXcomposite-devel libXdamage-devel libXrandr-devel libnotify-devel \
   harfbuzz-devel hyphen-devel enchant2-devel brotli-devel zlib-devel \
