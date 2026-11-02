@@ -14,9 +14,10 @@ if root.exists():
 (root / 'bin').mkdir(parents=True)
 (root / 'lib').mkdir()
 shutil.copy2('/work/src-tauri/target/release/easygit', root / 'bin/easygit')
-for name in ('lib', 'libexec', 'share'):
+for name in ('bin', 'lib', 'libexec', 'share'):
     if (prefix / name).exists():
         shutil.copytree(prefix / name, root / name, dirs_exist_ok=True, symlinks=False)
+shutil.copy2('/usr/bin/bwrap', root / 'bin/bwrap')
 # GTK needs its image loaders and MIME/schema databases in addition to ELF libraries.
 for source, target in (
     ('/usr/lib64/gdk-pixbuf-2.0', 'lib/gdk-pixbuf-2.0'),
@@ -61,6 +62,8 @@ for binary in sorted(root.rglob('*')):
 (root / 'start.sh').write_text('''#!/usr/bin/env bash
 set -euo pipefail
 APP_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+export EASYGIT_BWRAP="$APP_DIR/bin/bwrap"
+export EASYGIT_DBUS_PROXY="$APP_DIR/bin/xdg-dbus-proxy"
 export LD_LIBRARY_PATH="$APP_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 export XDG_DATA_DIRS="$APP_DIR/share:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
 export GSETTINGS_SCHEMA_DIR="$APP_DIR/share/glib-2.0/schemas"
