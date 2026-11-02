@@ -51,6 +51,11 @@ if ! pkg-config --exists 'webkit2gtk-4.1 >= 2.40'; then
   meson setup harfbuzz-build harfbuzz-6.0.0 --prefix="$PREFIX" --libdir=lib -Dicu=enabled -Dtests=disabled -Ddocs=disabled -Dintrospection=disabled
   ninja -C harfbuzz-build -j2
   ninja -C harfbuzz-build install
+  fetch https://download.gnome.org/sources/atk/2.38/atk-2.38.0.tar.xz atk.tar.xz
+  meson setup atk-build atk-2.38.0 --prefix="$PREFIX" --libdir=lib -Ddocs=false -Dintrospection=false
+  ninja -C atk-build -j2
+  ninja -C atk-build install
+  pkg-config --atleast-version=2.35.1 atk
   fetch https://download.gnome.org/sources/gtk+/3.24/gtk+-3.24.38.tar.xz gtk.tar.xz
   meson setup gtk-build gtk+-3.24.38 --prefix="$PREFIX" --libdir=lib \
     -Dwayland_backend=false -Dbroadway_backend=false -Dintrospection=false \
