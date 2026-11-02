@@ -21,12 +21,18 @@ jobs:
     timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
+      - name: Restore completed dependency stages
+        uses: actions/cache/restore@v4
+        with:
+          path: .rocky-runtime
+          key: rocky8-x86_64-runtime-v1-${{ github.run_id }}
+          restore-keys: rocky8-x86_64-runtime-v1-
       - name: Build on glibc 2.28, including WebKitGTK API 4.1
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p out
-          docker run --rm -v "$PWD:/work" rockylinux/rockylinux:8.10 \
+          mkdir -p out .rocky-runtime
+          docker run --rm -v "$PWD:/work" -v "$PWD/.rocky-runtime:/opt/easygit-runtime" rockylinux/rockylinux:8.10 \
             bash /work/scripts/linux/build-rocky8.sh 2>&1 | tee out/build.log
       - name: Test extracted package in clean Rocky Linux
         shell: bash
@@ -35,6 +41,12 @@ jobs:
           test -s out/easygit-linux-x86_64.tar.gz
           docker run --rm -v "$PWD:/work" rockylinux/rockylinux:8.10 \
             bash /work/scripts/linux/smoke-rocky8.sh 2>&1 | tee out/smoke.log
+      - name: Preserve completed dependency stages
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: .rocky-runtime
+          key: rocky8-x86_64-runtime-v1-${{ github.run_id }}
       - name: Upload portable package and diagnostics
         if: always()
         uses: actions/upload-artifact@v4
