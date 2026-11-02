@@ -4,7 +4,7 @@ cd /work
 # All build-time changes occur inside the disposable Rocky Linux container.
 dnf -y install dnf-plugins-core epel-release
 dnf config-manager --set-enabled powertools
-dnf -y install gcc-toolset-12-gcc-c++ make cmake ninja-build python39 python39-pip \
+dnf -y install gcc-toolset-12-gcc-c++ gcc-toolset-12-libatomic-devel make cmake ninja-build python39 python39-pip \
   git curl tar xz unzip patch pkgconf-pkg-config bison flex gperf ruby perl unifdef libseccomp-devel \
   gtk3-devel libappindicator-gtk3-devel glib2-devel libffi-devel pcre2-devel \
   libxml2-devel libxslt-devel sqlite-devel libicu-devel libjpeg-turbo-devel \
@@ -27,6 +27,11 @@ export CMAKE_PREFIX_PATH="$PREFIX"
 export CFLAGS="-O2 -fPIC"
 export CXXFLAGS="-O2 -fPIC"
 mkdir -p /build "$PREFIX" /work/out
+# WebKit's bmalloc uses 16-byte atomics on x86_64; verify the matching GCC
+# development library before spending time compiling the browser engine.
+printf '%s\n' '__int128 value;' \
+  'int main(void) { return (int)__atomic_load_n(&value, __ATOMIC_SEQ_CST); }' \
+  | cc -x c - -o /build/atomic-check -latomic
 cd /build
 fetch() { curl --fail --location --retry 4 "$1" -o "$2"; tar -xf "$2"; }
 if ! pkg-config --exists 'webkit2gtk-4.1 >= 2.40'; then
