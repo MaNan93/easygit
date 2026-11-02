@@ -20,6 +20,7 @@ ln -sf /usr/bin/python3.9 /usr/local/bin/python3
 python3.9 -m pip install 'setuptools==68.2.2' 'meson==1.2.3' 'ninja==1.11.1.1' 'cmake==3.27.9'
 export PATH="/usr/local/bin:$PATH"
 export PREFIX=/opt/easygit-runtime
+export PATH="$PREFIX/bin:$PATH"
 export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:$PREFIX/lib64/pkgconfig:$PREFIX/share/pkgconfig"
 export LD_LIBRARY_PATH="$PREFIX/lib:$PREFIX/lib64:${LD_LIBRARY_PATH:-}"
 export CMAKE_PREFIX_PATH="$PREFIX"
@@ -36,7 +37,7 @@ if ! pkg-config --exists 'webkit2gtk-4.1 >= 2.40'; then
   ninja -C glib-build install
   fetch https://download.gnome.org/sources/libsoup/3.2/libsoup-3.2.3.tar.xz soup.tar.xz
   meson setup soup-build libsoup-3.2.3 --prefix="$PREFIX" --libdir=lib \
-    -Dtests=false -Dexamples=false -Dintrospection=disabled -Dvapi=disabled \
+    -Dtests=false -Dintrospection=disabled -Dvapi=disabled \
     -Dsysprof=disabled -Dtls_check=false -Ddocs=disabled
   ninja -C soup-build -j2
   ninja -C soup-build install
