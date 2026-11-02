@@ -16,7 +16,8 @@ dnf -y install gcc-toolset-12-gcc-c++ make cmake ninja-build python39 python39-p
 set +u
 source /opt/rh/gcc-toolset-12/enable
 set -u
-python3.9 -m pip install 'meson==1.2.3' 'ninja==1.11.1.1' 'cmake==3.27.9'
+ln -sf /usr/bin/python3.9 /usr/local/bin/python3
+python3.9 -m pip install 'setuptools==68.2.2' 'meson==1.2.3' 'ninja==1.11.1.1' 'cmake==3.27.9'
 export PATH="/usr/local/bin:$PATH"
 export PREFIX=/opt/easygit-runtime
 export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:$PREFIX/lib64/pkgconfig:$PREFIX/share/pkgconfig"
