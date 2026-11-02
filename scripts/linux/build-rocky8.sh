@@ -91,6 +91,13 @@ if ! pkg-config --exists 'webkit2gtk-4.1 >= 2.42' 'gtk+-wayland-3.0'; then
   pkg-config --atleast-version=2.35.1 atk
     touch "$PREFIX/.built-atk-2.38.0"
   fi
+  if [[ ! -f "$PREFIX/.built-cairo-1.16.0" ]]; then
+  fetch https://cairographics.org/releases/cairo-1.16.0.tar.xz cairo.tar.xz
+  (cd cairo-1.16.0 && ./configure --prefix="$PREFIX" --libdir="$PREFIX/lib" \
+    --disable-static --enable-gobject --disable-gtk-doc && make -j2 && make install)
+  pkg-config --atleast-version=1.16.0 cairo
+    touch "$PREFIX/.built-cairo-1.16.0"
+  fi
   if [[ ! -f "$PREFIX/.built-gtk-3.24.38-wayland" ]]; then
   fetch https://download.gnome.org/sources/gtk+/3.24/gtk+-3.24.38.tar.xz gtk.tar.xz
   meson setup gtk-build gtk+-3.24.38 --prefix="$PREFIX" --libdir=lib \

@@ -6,7 +6,7 @@ Target: Linux x86_64, glibc 2.28. The desktop UI is retained.
 
 Run the **Linux Rocky 8 portable** GitHub Actions workflow on main. It builds inside the Rocky-maintained `rockylinux/rockylinux:8.10` container, independently of the Ubuntu runner's system libraries.
 
-The initial compatibility recipe builds GLib 2.70.5, libsoup 3.2.3, ICU 72.1, HarfBuzz 6.0.0, GTK 3.24.38 and WebKitGTK 2.42.5 (API 4.1) from upstream sources. GTK includes X11 and Wayland symbols required by Tauri/tao; WebKit's display target remains X11. WebKit 2.42 supplies the Cookie APIs used by the locked wry version. GTK 3.24 is required by this Tauri version; Rocky 8's GTK 3.22 alone is insufficient. The older WebKit engine is for compatibility evaluation, not a current security-supported engine.
+The initial compatibility recipe builds GLib 2.70.5, libsoup 3.2.3, ICU 72.1, HarfBuzz 6.0.0, Cairo 1.16.0, GTK 3.24.38 and WebKitGTK 2.42.5 (API 4.1) from upstream sources. GTK includes X11 and Wayland symbols required by Tauri/tao; WebKit's display target remains X11. WebKit 2.42 supplies the Cookie APIs used by the locked wry version. GTK 3.24 is required by this Tauri version; Rocky 8's GTK 3.22 alone is insufficient. The older WebKit engine is for compatibility evaluation, not a current security-supported engine.
 
 WebKit's release-build relocation hooks and sandbox helper paths are patched to allow an arbitrary extraction directory. Bubblewrap sandboxing is retained.
 
