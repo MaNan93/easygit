@@ -49,6 +49,13 @@ if ! pkg-config --exists 'webkit2gtk-4.1 >= 2.40'; then
   meson setup harfbuzz-build harfbuzz-6.0.0 --prefix="$PREFIX" --libdir=lib -Dicu=enabled -Dtests=disabled -Ddocs=disabled -Dintrospection=disabled
   ninja -C harfbuzz-build -j2
   ninja -C harfbuzz-build install
+  fetch https://download.gnome.org/sources/gtk+/3.24/gtk+-3.24.38.tar.xz gtk.tar.xz
+  meson setup gtk-build gtk+-3.24.38 --prefix="$PREFIX" --libdir=lib \
+    -Dwayland_backend=false -Dbroadway_backend=false -Dintrospection=false \
+    -Dtests=false -Dinstalled_tests=false -Ddemos=false -Dexamples=false \
+    -Dgtk_doc=false -Dman=false -Dprint_backends=file,lpr
+  ninja -C gtk-build -j2
+  ninja -C gtk-build install
   fetch https://webkitgtk.org/releases/webkitgtk-2.40.5.tar.xz webkit.tar.xz
   # Keep sandboxing enabled; allow only the upstream relocation hooks in release builds.
   python3.9 - <<'PY'
