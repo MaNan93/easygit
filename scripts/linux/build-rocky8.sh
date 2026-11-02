@@ -16,6 +16,9 @@ dnf -y install gcc-toolset-12-gcc-c++ gcc-toolset-12-libatomic-devel make cmake 
 set +u
 source /opt/rh/gcc-toolset-12/enable
 set -u
+# WebKit's Perl code generators consult CC, independently of CMake's compiler.
+export CC="$(command -v gcc)"
+export CXX="$(command -v g++)"
 ln -sf /usr/bin/python3.9 /usr/local/bin/python3
 python3.9 -m pip install 'setuptools==68.2.2' 'meson==1.2.3' 'ninja==1.11.1.1' 'cmake==3.27.9'
 export PATH="/usr/local/bin:$PATH"
