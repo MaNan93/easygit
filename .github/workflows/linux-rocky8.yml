@@ -1,0 +1,38 @@
+name: Linux Rocky 8 portable
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/linux-rocky8.yml'
+      - 'scripts/linux/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: linux-rocky8-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  portable:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build on glibc 2.28, including WebKitGTK API 4.1
+        run: |
+          mkdir -p out
+          docker run --rm -v "$PWD:/work" rockylinux:8.10 \
+            bash /work/scripts/linux/build-rocky8.sh 2>&1 | tee out/build.log
+      - name: Upload portable package and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: easygit-rocky8-x86_64
+          path: |
+            out/*.tar.gz
+            out/*.log
+          if-no-files-found: error
+          retention-days: 14
