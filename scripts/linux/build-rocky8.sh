@@ -35,6 +35,14 @@ mkdir -p /build "$PREFIX" /work/out
 printf '%s\n' '__int128 value;' \
   'int main(void) { return (int)__atomic_load_n(&value, __ATOMIC_SEQ_CST); }' \
   | cc -x c - -o /build/atomic-check -latomic
+# Catch frontend install/test failures before the lengthy WebKit build.
+cd /build
+curl --fail --location --retry 4 https://nodejs.org/dist/v22.14.0/node-v22.14.0-linux-x64.tar.xz -o node.tar.xz
+tar -xf node.tar.xz
+export PATH="/build/node-v22.14.0-linux-x64/bin:$PATH"
+cd /work
+npm ci
+npm run check
 cd /build
 fetch() { curl --fail --location --retry 4 "$1" -o "$2"; tar -xf "$2"; }
 if ! pkg-config --exists 'webkit2gtk-4.1 >= 2.40'; then
@@ -123,15 +131,10 @@ PY
 fi
 pkg-config --modversion webkit2gtk-4.1
 cd /build
-curl --fail --location --retry 4 https://nodejs.org/dist/v22.14.0/node-v22.14.0-linux-x64.tar.xz -o node.tar.xz
-tar -xf node.tar.xz
-export PATH="/build/node-v22.14.0-linux-x64/bin:$PATH"
 curl --fail --location --retry 4 https://sh.rustup.rs -o rustup.sh
 sh rustup.sh -y --profile minimal --default-toolchain stable
 source "$HOME/.cargo/env"
 cd /work
-npm ci
-npm run check
 npm run tauri:build -- --no-bundle
 cargo test --locked --manifest-path src-tauri/Cargo.toml --lib -- --test-threads=2
 python3.9 scripts/linux/package-portable.py
