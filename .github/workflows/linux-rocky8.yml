@@ -22,9 +22,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build on glibc 2.28, including WebKitGTK API 4.1
+        shell: bash
         run: |
+          set -euo pipefail
           mkdir -p out
-          docker run --rm -v "$PWD:/work" rockylinux:8.10 \
+          docker run --rm -v "$PWD:/work" rockylinux/rockylinux:8.10 \
             bash /work/scripts/linux/build-rocky8.sh 2>&1 | tee out/build.log
       - name: Upload portable package and diagnostics
         if: always()
